@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="./banner.jpg" alt="Combogó Flow" width="100%"/>
+</p>
+
 # Combogó Flow — Especificação do Projeto
 
 Aplicação web inspirada no Trello: quadros Kanban colaborativos com atualizações em tempo real entre múltiplos usuários conectados simultaneamente ao mesmo quadro.
