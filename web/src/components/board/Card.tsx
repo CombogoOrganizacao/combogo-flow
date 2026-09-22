@@ -12,8 +12,16 @@ import type { BoardMember, Card as CardType } from "@/types";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Markdown from "react-markdown";
 import { MarkdownTextarea } from "../markdownTextArea";
+import { Skeleton } from "@/components/ui/skeleton";
 
 function MemberAvatar({ member, size = "h-6 w-6" }: { member: BoardMember; size?: string }) {
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => {
+    setImageLoaded(false);
+    setImageFailed(false);
+  }, [member.photoURL]);
+
   const initials = member.displayName
     .split(" ")
     .map((part) => part[0])
@@ -21,19 +29,28 @@ function MemberAvatar({ member, size = "h-6 w-6" }: { member: BoardMember; size?
     .slice(0, 2)
     .toUpperCase();
 
-  return member.photoURL ? (
-    <img
-      src={member.photoURL}
-      alt={member.displayName}
-      title={member.displayName}
-      className={cn(size, "rounded-full object-cover ring-2 ring-background")}
-    />
-  ) : (
+  if (!member.photoURL || imageFailed) {
+    return (
     <span
       title={member.displayName}
       className={cn(size, "flex items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground ring-2 ring-background")}
     >
       {initials}
+    </span>
+    );
+  }
+
+  return (
+    <span className={cn(size, "relative block shrink-0 overflow-hidden rounded-full ring-2 ring-background")}>
+      {!imageLoaded && <Skeleton className="absolute inset-0 rounded-full" />}
+      <img
+        src={member.photoURL}
+        alt={member.displayName}
+        title={member.displayName}
+        onLoad={() => setImageLoaded(true)}
+        onError={() => setImageFailed(true)}
+        className={cn(size, "rounded-full object-cover transition-opacity", imageLoaded ? "opacity-100" : "opacity-0")}
+      />
     </span>
   );
 }
