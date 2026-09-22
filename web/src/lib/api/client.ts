@@ -1,4 +1,5 @@
 import { getIdToken } from "@/lib/firebase/auth";
+import type { BoardMember } from "@/types";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
@@ -36,6 +37,8 @@ export const api = {
       method: "POST",
       body: JSON.stringify({ email }),
     }),
+  getBoardMembers: (boardId: string) =>
+    request<BoardMember[]>(`/boards/${boardId}/members`),
 
   // Lists
   createList: (boardId: string, title: string) =>
@@ -58,7 +61,7 @@ export const api = {
       method: "PATCH",
       body: JSON.stringify({ targetListId, targetOrder }),
     }),
-  updateCard: (cardId: string, data: { title?: string; description?: string }) =>
+  updateCard: (cardId: string, data: { title?: string; description?: string; assigneeIds?: string[] }) =>
     request<void>(`/cards/${cardId}`, { method: "PATCH", body: JSON.stringify(data) }),
   deleteCard: (cardId: string) => request<void>(`/cards/${cardId}`, { method: "DELETE" }),
 };

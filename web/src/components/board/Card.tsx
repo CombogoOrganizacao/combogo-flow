@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Trash2 } from "lucide-react";
@@ -8,12 +8,37 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api/client";
-import type { Card as CardType } from "@/types";
+import type { BoardMember, Card as CardType } from "@/types";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import Markdown from "react-markdown";
 import { MarkdownTextarea } from "../markdownTextArea";
 
-export function Card({ card }: { card: CardType }) {
+function MemberAvatar({ member, size = "h-6 w-6" }: { member: BoardMember; size?: string }) {
+  const initials = member.displayName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+
+  return member.photoURL ? (
+    <img
+      src={member.photoURL}
+      alt={member.displayName}
+      title={member.displayName}
+      className={cn(size, "rounded-full object-cover ring-2 ring-background")}
+    />
+  ) : (
+    <span
+      title={member.displayName}
+      className={cn(size, "flex items-center justify-center rounded-full bg-primary text-[10px] font-semibold text-primary-foreground ring-2 ring-background")}
+    >
+      {initials}
+    </span>
+  );
+}
+
+export function Card({ card, members }: { card: CardType; members: BoardMember[] }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: card.id,
     data: { type: "card", card },
@@ -23,13 +48,18 @@ export function Card({ card }: { card: CardType }) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [title, setTitle] = useState(card.title);
   const [description, setDescription] = useState(card.description ?? "");
+  const [assigneeIds, setAssigneeIds] = useState(card.assigneeIds ?? []);
   const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setAssigneeIds(card.assigneeIds ?? []);
+  }, [card.assigneeIds]);
 
   async function handleSave() {
     if (!title.trim()) return;
     setSaving(true);
     try {
-      await api.updateCard(card.id, { title: title.trim(), description });
+      await api.updateCard(card.id, { title: title.trim(), description, assigneeIds });
       setEditing(false);
     } finally {
       setSaving(false);
@@ -44,6 +74,14 @@ export function Card({ card }: { card: CardType }) {
   async function handleDelete() {
     await api.deleteCard(card.id);
   }
+
+  function toggleAssignee(memberId: string) {
+    setAssigneeIds((current) =>
+      current.includes(memberId) ? current.filter((id) => id !== memberId) : [...current, memberId],
+    );
+  }
+
+  const assignedMembers = members.filter((member) => assigneeIds.includes(member.id));
 
   if (editing) {
     return (
@@ -89,6 +127,13 @@ export function Card({ card }: { card: CardType }) {
                 <Markdown>{card.description}</Markdown>
               </div>
             )}
+            {assignedMembers.length > 0 && (
+              <div className="mt-2 flex -space-x-1">
+                {assignedMembers.map((member) => (
+                  <MemberAvatar key={member.id} member={member} />
+                ))}
+              </div>
+            )}
           </div>
         </DialogTrigger>
         <button
@@ -108,6 +153,29 @@ export function Card({ card }: { card: CardType }) {
           />
           <div className="prose">
             <MarkdownTextarea value={description} onChange={setDescription} placeholder="Descrição (opcional)" />
+          </div>
+          <div className="space-y-2">
+            <p className="text-sm font-medium">Pessoas associadas</p>
+            <div className="flex flex-wrap gap-2">
+              {members.map((member) => {
+                const selected = assigneeIds.includes(member.id);
+                return (
+                  <button
+                    key={member.id}
+                    type="button"
+                    aria-pressed={selected}
+                    onClick={() => toggleAssignee(member.id)}
+                    className={cn(
+                      "flex items-center gap-2 rounded-full border px-2 py-1 text-xs transition-colors",
+                      selected ? "border-primary bg-primary/10" : "border-border hover:bg-muted",
+                    )}
+                  >
+                    <MemberAvatar member={member} size="h-5 w-5" />
+                    <span>{member.displayName}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="ghost" onClick={() => setDialogOpen(false)} disabled={saving}>

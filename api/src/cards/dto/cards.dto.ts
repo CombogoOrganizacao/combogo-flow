@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
+import { IsArray, IsInt, IsNotEmpty, IsOptional, IsString, Min } from "class-validator";
 
 export class CreateCardDto {
   @IsString()
@@ -14,6 +14,11 @@ export class UpdateCardDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  assigneeIds?: string[];
 }
 
 export class MoveCardDto {

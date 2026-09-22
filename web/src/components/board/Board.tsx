@@ -10,7 +10,7 @@ import { Card as CardComponent } from "./Card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api/client";
-import type { Card } from "@/types";
+import type { BoardMember, Card } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 import "./bg.css"
@@ -27,9 +27,26 @@ export function Board({ boardId }: { boardId: string }) {
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviting, setInviting] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<string | null>(null);
+  const [members, setMembers] = useState<BoardMember[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 4 } }));
+
+  useEffect(() => {
+    let active = true;
+    setMembers([]);
+    api.getBoardMembers(boardId)
+      .then((boardMembers) => {
+        if (active) setMembers(boardMembers);
+      })
+      .catch((err) => {
+        if (active) setInviteMessage(err instanceof Error ? err.message : "Não foi possível carregar os membros.");
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [boardId, board?.memberIds]);
 
   // Animação de entrada das colunas quando o board carrega/atualiza
   useEffect(() => {
@@ -131,7 +148,7 @@ export function Board({ boardId }: { boardId: string }) {
       <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         <div ref={containerRef} className="flex flex-1 gap-4 overflow-x-auto p-4 ">
           {lists.map((list) => (
-            <List key={list.id} list={list} cards={cardsByList(list.id)} />
+            <List key={list.id} list={list} cards={cardsByList(list.id)} members={members} />
           ))}
 
           <div className="flex w-72 shrink-0 flex-col gap-2 rounded-lg border border-dashed border-border p-3">
@@ -148,7 +165,7 @@ export function Board({ boardId }: { boardId: string }) {
           </div>
         </div>
 
-        <DragOverlay>{activeCard ? <CardComponent card={activeCard} /> : null}</DragOverlay>
+        <DragOverlay>{activeCard ? <CardComponent card={activeCard} members={members} /> : null}</DragOverlay>
       </DndContext>
     </div>
   );
