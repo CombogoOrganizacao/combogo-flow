@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { FirebaseAuthGuard } from "../auth/firebase-auth.guard";
 import { CurrentUser } from "../auth/current-user.decorator";
 import type { AuthenticatedUser } from "../auth/firebase-auth.guard";
@@ -22,5 +22,10 @@ export class BoardsController {
     @CurrentUser() user: AuthenticatedUser,
   ) {
     return this.boardsService.addMember(boardId, user.uid, dto.email);
+  }
+
+  @Get(":boardId/members")
+  getMembers(@Param("boardId") boardId: string, @CurrentUser() user: AuthenticatedUser) {
+    return this.boardsService.getMembers(boardId, user.uid);
   }
 }

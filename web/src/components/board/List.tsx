@@ -8,9 +8,9 @@ import { Card } from "./Card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { api } from "@/lib/api/client";
-import type { Card as CardType, List as ListType } from "@/types";
+import type { BoardMember, Card as CardType, List as ListType } from "@/types";
 
-export function List({ list, cards }: { list: ListType; cards: CardType[] }) {
+export function List({ list, cards, members }: { list: ListType; cards: CardType[]; members: BoardMember[] }) {
   const { setNodeRef } = useDroppable({ id: list.id, data: { type: "list", list } });
   const [newCardTitle, setNewCardTitle] = useState("");
   const [adding, setAdding] = useState(false);
@@ -74,7 +74,7 @@ export function List({ list, cards }: { list: ListType; cards: CardType[] }) {
       <div ref={setNodeRef} className="flex min-h-[8px] flex-col gap-2">
         <SortableContext items={cards.map((c) => c.id)} strategy={verticalListSortingStrategy}>
           {cards.map((card) => (
-            <Card key={card.id} card={card} />
+            <Card key={card.id} card={card} members={members} />
           ))}
         </SortableContext>
       </div>

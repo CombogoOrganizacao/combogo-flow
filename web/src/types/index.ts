@@ -6,6 +6,13 @@ export interface Board {
   createdAt: number;
 }
 
+export interface BoardMember {
+  id: string;
+  displayName: string;
+  email: string;
+  photoURL: string | null;
+}
+
 export interface List {
   id: string;
   boardId: string;

@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import * as admin from "firebase-admin";
 import { FIRESTORE } from "../firebase/firebase.module";
 import { BoardsService } from "../boards/boards.service";
@@ -47,9 +47,20 @@ export class CardsService {
     return { id: ref.id };
   }
 
-  async update(cardId: string, requesterUid: string, data: { title?: string; description?: string }) {
+  async update(
+    cardId: string,
+    requesterUid: string,
+    data: { title?: string; description?: string; assigneeIds?: string[] },
+  ) {
     const card = await this.getCardOrThrow(cardId);
-    await this.boardsService.assertMember(card.boardId, requesterUid);
+    const board = await this.boardsService.assertMember(card.boardId, requesterUid);
+
+    if (data.assigneeIds) {
+      const memberIds = new Set((board.memberIds ?? []) as string[]);
+      if (data.assigneeIds.some((uid) => !memberIds.has(uid))) {
+        throw new BadRequestException("Todos os responsáveis precisam ser membros do board.");
+      }
+    }
 
     await this.firestore
       .collection("cards")
