@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Trash2 } from "lucide-react";
+import { AlignLeft, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -106,7 +106,7 @@ export function Card({ card, members }: { card: CardType; members: BoardMember[]
 
   if (editing) {
     return (
-      <div className="rounded-md border border-border bg-background p-3 text-sm shadow-sm">
+      <div className="rounded-md border border-slate-200 bg-white p-3 text-sm shadow-sm">
         <Input value={title} onChange={(e) => setTitle(e.target.value)} className="mb-2 h-8 text-xs" />
         <textarea
           value={description}
@@ -130,26 +130,27 @@ export function Card({ card, members }: { card: CardType; members: BoardMember[]
   return (
     <div
       ref={setNodeRef}
-      className={cn(
-        "group relative rounded-md border border-border bg-background p-3 text-sm shadow-sm",
-        isDragging && "opacity-50",
-      )}
+        className={cn(
+          "group relative rounded-md border border-slate-200/90 bg-white p-3 text-sm shadow-sm transition-[box-shadow,transform,border-color] duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md",
+          isDragging && "rotate-1 opacity-50 shadow-lg",
+        )}
     >
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger className="flex w-full text-left">
           <div
             {...attributes}
             {...listeners}
-            className="w-full cursor-grab pr-6 active:cursor-grabbing"
+            className="w-full cursor-grab pr-5 text-left active:cursor-grabbing"
           >
-            {card.title}
+            <span className="block font-medium leading-snug text-slate-800">{card.title}</span>
             {card.description && (
-              <div className="prose prose-sm dark:prose-invert mt-1 line-clamp-2 max-w-none text-muted-foreground">
+              <div className="prose prose-sm mt-1 line-clamp-2 max-w-none text-xs text-slate-500">
                 <Markdown>{card.description}</Markdown>
               </div>
             )}
+            {card.description && <AlignLeft aria-hidden="true" className="absolute bottom-3 right-3 h-3.5 w-3.5 text-slate-400" />}
             {assignedMembers.length > 0 && (
-              <div className="mt-2 flex -space-x-1">
+              <div className="mt-3 flex -space-x-1">
                 {assignedMembers.map((member) => (
                   <MemberAvatar key={member.id} member={member} />
                 ))}
@@ -160,17 +161,18 @@ export function Card({ card, members }: { card: CardType; members: BoardMember[]
         <button
           type="button"
           onClick={handleDelete}
-          className="absolute right-2 top-2 hidden text-muted-foreground hover:text-destructive group-hover:block"
+          title="Excluir cartão"
+          className="absolute right-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded text-slate-400 opacity-0 transition-all hover:bg-slate-100 hover:text-destructive focus-visible:opacity-100 group-hover:opacity-100"
           aria-label="Excluir card"
         >
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="h-3.5 w-3.5" />
         </button>
         <DialogContent className="sm:max-w-2xl md:max-w-3xl">
           <DialogTitle className="sr-only">Editar card</DialogTitle>
           <Input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="font-bold sm:text-4xl md:text-4xl"
+            className="text-lg font-semibold sm:text-xl"
           />
           <div className="prose">
             <MarkdownTextarea value={description} onChange={setDescription} placeholder="Descrição (opcional)" />

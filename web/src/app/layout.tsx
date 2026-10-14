@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={cn("font-sans dark", raleway.variable)}>
+    <html lang="pt-BR" className={cn("font-sans", raleway.variable)}>
       <head>
         <link rel="icon" href="/cmb-icon.svg" sizes="any" />
       </head>

@@ -1,30 +1,7 @@
-/* From Uiverse.io by jeremyssocial */ 
 .bgg {
-  /* Basic dimensions and centering */
-
-  /* Dark mode colors and gradient */
-  background: #121212; /* Fallback for browsers that don't support gradients */
-  background: linear-gradient(
-    135deg,
-    #121212 25%,
-    #1a1a1a 25%,
-    #1a1a1a 50%,
-    #121212 50%,
-    #121212 75%,
-    #1a1a1a 75%,
-    #1a1a1a
-  );
-  background-size: 40px 40px;
-
-  /* Animation */
-  animation: move 4s linear infinite;
-}
-
-@keyframes move {
-  0% {
-    background-position: 0 0;
-  }
-  100% {
-    background-position: 40px 40px;
-  }
+  background-color: #1675bd;
+  background-image:
+    radial-gradient(ellipse at 18% 8%, rgb(126 211 222 / 42%), transparent 32%),
+    radial-gradient(ellipse at 88% 92%, rgb(242 191 120 / 24%), transparent 38%),
+    linear-gradient(135deg, #1675bd 0%, #168e9a 52%, #287ca8 100%);
 }
